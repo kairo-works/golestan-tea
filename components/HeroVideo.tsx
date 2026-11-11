@@ -53,8 +53,31 @@ export default function HeroVideo() {
     }
 
     let duration = 0;
+    // The ScrollTrigger instance, once created, held in an object so the
+    // metadata handler (and the post-creation sync below) can read it.
+    // When the video metadata finally arrives (slow on a big file / slow
+    // network), we jump straight to the frame matching the user's current
+    // scroll position instead of waiting for their next scroll.
+    const scrollState: { trigger: ScrollTrigger | null } = { trigger: null };
+    const seekToProgress = (p: number) => {
+      // Desktop only: map scroll progress -> video.currentTime.
+      // Seek only while paused (the video never plays on desktop).
+      if (!isMobile && video.paused && Number.isFinite(duration) && duration > 0) {
+        const target = p * duration;
+        // Avoid redundant seeks.
+        if (Math.abs(video.currentTime - target) > 0.04) {
+          try {
+            video.currentTime = target;
+          } catch {
+            /* seek interrupted by a newer one — ignore */
+          }
+        }
+      }
+    };
     const onMeta = () => {
       duration = video.duration;
+      // Metadata arrived after the user already scrolled: sync the frame now.
+      if (scrollState.trigger) seekToProgress(scrollState.trigger.progress);
     };
     video.addEventListener("loadedmetadata", onMeta);
     if (video.readyState >= 1) duration = video.duration;
@@ -78,7 +101,7 @@ export default function HeroVideo() {
     }
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
+      scrollState.trigger = ScrollTrigger.create({
         trigger: section,
         start: "top top",
         end: "bottom bottom",
@@ -86,19 +109,7 @@ export default function HeroVideo() {
         onUpdate: (self) => {
           const p = self.progress;
 
-          // Desktop only: map scroll progress -> video.currentTime.
-          // Seek only while paused (the video never plays on desktop).
-          if (!isMobile && video.paused && Number.isFinite(duration) && duration > 0) {
-            const target = p * duration;
-            // Avoid redundant seeks.
-            if (Math.abs(video.currentTime - target) > 0.04) {
-              try {
-                video.currentTime = target;
-              } catch {
-                /* seek interrupted by a newer one — ignore */
-              }
-            }
-          }
+          seekToProgress(p);
 
           // Overlay headlines.
           lineRefs.current.forEach((el, i) => {
@@ -117,6 +128,10 @@ export default function HeroVideo() {
         },
       });
     }, section);
+
+    // Metadata already arrived before the trigger existed (and the user is
+    // mid-scroll): sync the frame to the current scroll position now.
+    if (scrollState.trigger) seekToProgress(scrollState.trigger.progress);
 
     return () => {
       ctx.revert();

@@ -1,6 +1,48 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { LangProvider } from "@/lib/lang";
+
+const cormorant = localFont({
+  src: [
+    {
+      path: "./fonts/CormorantGaramond-latin.woff2",
+      weight: "300 700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
+const inter = localFont({
+  src: [
+    {
+      path: "./fonts/Inter-latin.woff2",
+      weight: "100 900",
+      style: "normal",
+    },
+  ],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const vazirmatn = localFont({
+  src: [
+    {
+      path: "./fonts/Vazirmatn-arabic.woff2",
+      weight: "100 900",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Vazirmatn-latin.woff2",
+      weight: "100 900",
+      style: "normal",
+    },
+  ],
+  variable: "--font-vazirmatn",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "GOLESTAN TEA — Pour. Wait. Breathe.",
@@ -20,19 +62,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      style={
-        {
-          "--font-cormorant": "Georgia, 'Times New Roman', serif",
-          "--font-inter":
-            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-          "--font-vazirmatn":
-            "Tahoma, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif",
-        } as React.CSSProperties
-      }
-    >
-      <body className="antialiased bg-black text-[#F5F1E8]">
+    <html lang="en">
+      <body
+        className={`${cormorant.variable} ${inter.variable} ${vazirmatn.variable} antialiased bg-black text-[#F5F1E8]`}
+      >
         <LangProvider>{children}</LangProvider>
       </body>
     </html>

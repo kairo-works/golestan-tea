@@ -20,7 +20,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      style={
+        {
+          "--font-cormorant": "Georgia, 'Times New Roman', serif",
+          "--font-inter":
+            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          "--font-vazirmatn":
+            "Tahoma, 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif",
+        } as React.CSSProperties
+      }
+    >
       <body className="antialiased bg-black text-[#F5F1E8]">
         <LangProvider>{children}</LangProvider>
       </body>
